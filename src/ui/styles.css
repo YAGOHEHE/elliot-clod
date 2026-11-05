@@ -1,0 +1,699 @@
+:root {
+  --ink: #22262e;
+  --cream: #f1ede2;
+  --cream-mid: #d9d4c7;
+  --cream-dark: #a9a596;
+  --wood: #e0a45e;
+  --wood-dark: #955a2d;
+  --orange: #3f5f86;
+  --orange-dark: #2c4666;
+  --green: #6f8f6a;
+  --green-dark: #4c5a66;
+  --night: #2b3038;
+  --font: 'VT323', 'Courier New', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 20px;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+#stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.px-icon {
+  image-rendering: pixelated;
+  display: block;
+  flex: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Biselado clásico de barra de herramientas */
+.tool-btn,
+.choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 3px 10px;
+  background: var(--cream-mid);
+  border: 2px solid;
+  border-color: #fbf9f2 var(--cream-dark) var(--cream-dark) #fbf9f2;
+  outline: 1px solid var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tool-btn:hover:not(:disabled),
+.choice:hover {
+  background: #e8e4d8;
+}
+
+.tool-btn:active:not(:disabled),
+.tool-btn.pressed,
+.choice.selected {
+  background: #bcd0e4;
+  border-color: var(--orange-dark) #dbe6f1 #dbe6f1 var(--orange-dark);
+}
+
+.tool-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.tool-btn:focus-visible,
+.choice:focus-visible,
+.swatch:focus-visible,
+.furn-cell:focus-visible,
+.map-room:focus-visible,
+.close-btn:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--orange-dark);
+  outline-offset: 1px;
+}
+
+.tool-btn.square {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 2px;
+}
+
+.tool-btn.small {
+  min-height: 32px;
+  padding: 2px 8px;
+}
+
+/* Barra inferior */
+#toolbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px calc(7px + env(safe-area-inset-bottom));
+  background: linear-gradient(var(--cream) 0 3px, var(--cream-mid) 3px);
+  border-top: 2px solid var(--ink);
+}
+
+.chat-form {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.chat-form input,
+#avatar-name {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 20px;
+  color: var(--ink);
+  background: #fdfcf8;
+  border: 2px solid;
+  border-color: var(--cream-dark) #fbf9f2 #fbf9f2 var(--cream-dark);
+  outline: 1px solid var(--ink);
+  border-radius: 0;
+}
+
+.chat-form input::placeholder {
+  color: #7c7a70;
+}
+
+.send-btn {
+  background: #bcd0e4;
+  flex: none;
+  width: 48px;
+}
+
+.tool-row {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+.avatar-slot {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+/* Placa de sala y zoom */
+#hud {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  padding: calc(8px + env(safe-area-inset-top)) 10px 0;
+}
+
+.hud-top > * {
+  pointer-events: auto;
+}
+
+.room-plate {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 12px 5px;
+  background: var(--green-dark);
+  color: var(--cream);
+  border: 2px solid;
+  border-color: #6f7f8d #333e48 #333e48 #6f7f8d;
+  outline: 1px solid var(--ink);
+  line-height: 1.1;
+}
+
+/* VT323 se lee nítida a 20 px: todo el texto de la interfaz va a ese tamaño. */
+.room-plate strong {
+  font-weight: 400;
+}
+
+.room-count {
+  color: #d9e1e8;
+}
+
+.zoom-box {
+  display: flex;
+  gap: 6px;
+}
+
+/* Rótulo inferior de falso documental */
+.lower-third {
+  position: fixed;
+  left: 10px;
+  bottom: 72px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 14px 5px 10px;
+  max-width: calc(100% - 20px);
+  background: #22262e;
+  color: #f1ede2;
+  border-left: 6px solid #bcd0e4;
+  line-height: 1.05;
+  pointer-events: none;
+}
+
+.lower-third strong {
+  font-weight: 400;
+}
+
+.lower-third span {
+  color: #bcd0e4;
+}
+
+/* Barra del modo edición */
+.edit-bar {
+  pointer-events: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  width: max-content;
+  max-width: calc(100% - 20px);
+  margin: 8px auto 0;
+  padding: 6px 10px;
+  background: var(--cream-mid);
+  border: 2px solid;
+  border-color: #fbf9f2 var(--cream-dark) var(--cream-dark) #fbf9f2;
+  outline: 1px solid var(--ink);
+}
+
+.edit-hint {
+  color: #4f5560;
+}
+
+.edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.only-placing {
+  display: none;
+}
+
+.edit-bar.placing .only-placing {
+  display: inline-flex;
+}
+
+/* Ventanas */
+#panels {
+  position: absolute;
+  right: 10px;
+  bottom: 68px;
+  z-index: 6;
+  max-width: calc(100% - 20px);
+  pointer-events: none;
+}
+
+.window {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  width: 420px;
+  max-width: 100%;
+  max-height: calc(100dvh - 130px);
+  background: var(--cream);
+  border: 2px solid;
+  border-color: #fbf9f2 var(--cream-dark) var(--cream-dark) #fbf9f2;
+  outline: 2px solid var(--ink);
+  box-shadow: 4px 4px 0 rgba(30, 15, 40, 0.45);
+}
+
+.window-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 4px 3px 10px;
+  background: var(--orange);
+  border-bottom: 2px solid var(--ink);
+  color: #fbf9f2;
+}
+
+.window-title h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 400;
+  text-shadow: 1px 1px 0 var(--orange-dark);
+}
+
+.close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: var(--cream-mid);
+  border: 2px solid;
+  border-color: #fbf9f2 var(--cream-dark) var(--cream-dark) #fbf9f2;
+  outline: 1px solid var(--ink);
+  cursor: pointer;
+}
+
+.window-body {
+  padding: 10px 12px 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.window-body h3 {
+  margin: 8px 0 6px;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--orange-dark);
+}
+
+.window-body h3:first-child {
+  margin-top: 0;
+}
+
+.muted {
+  margin: 0 0 10px;
+  color: #4f5560;
+}
+
+.drink-list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.drink-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  background: #fbf9f2;
+  outline: 1px solid var(--cream-dark);
+}
+
+.drink-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.drink-info small {
+  font-size: 20px;
+  color: #4f5560;
+}
+
+.furn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 6px;
+}
+
+.furn-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px 4px;
+  background: #fbf9f2;
+  border: 0;
+  outline: 1px solid var(--cream-dark);
+  cursor: pointer;
+}
+
+.furn-cell:hover {
+  background: #e8e4d8;
+  outline-color: var(--orange-dark);
+}
+
+.furn-count {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  padding: 0 3px;
+  color: #fbf9f2;
+  background: var(--green-dark);
+}
+
+.furn-name {
+  line-height: 1;
+  text-align: center;
+}
+
+/* Mapa */
+.map-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-template-rows: repeat(var(--rows), 74px);
+  gap: 10px;
+  padding: 2px;
+}
+
+.map-room {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  line-height: 1.1;
+  color: #fdfcf8;
+  text-shadow: 1px 1px 0 var(--ink);
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  outline: 2px solid var(--ink);
+  cursor: pointer;
+  min-width: 0;
+}
+
+.map-room strong {
+  font-weight: 400;
+}
+
+.map-room:hover {
+  filter: brightness(1.08);
+}
+
+.map-room.on-light {
+  color: var(--ink);
+  text-shadow: none;
+}
+
+.map-room.here {
+  outline: 3px solid var(--orange);
+}
+
+.map-door {
+  position: absolute;
+  background: var(--orange);
+  outline: 1px solid var(--ink);
+  pointer-events: none;
+}
+
+.map-door.h {
+  width: 14px;
+  height: 8px;
+  margin: -4px 0 0 -7px;
+}
+
+.map-door.v {
+  width: 8px;
+  height: 14px;
+  margin: -7px 0 0 -4px;
+}
+
+/* Avatar */
+.avatar-editor {
+  display: flex;
+  gap: 12px;
+}
+
+.avatar-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.avatar-preview {
+  width: 120px;
+  height: 204px;
+  background: #cfe2f2;
+  outline: 1px solid var(--ink);
+}
+
+.avatar-options {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.option-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.option-label {
+  color: #4f5560;
+}
+
+#avatar-name {
+  flex: none;
+  width: 100%;
+  height: 36px;
+}
+
+.swatches,
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.swatch {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 2px solid #fbf9f2;
+  outline: 1px solid var(--ink);
+  cursor: pointer;
+}
+
+.swatch.selected {
+  outline: 3px solid var(--orange-dark);
+}
+
+.choice {
+  min-height: 30px;
+  padding: 0 8px;
+}
+
+/* Avisos */
+#toasts {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 72px;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  pointer-events: none;
+}
+
+.toast {
+  padding: 5px 12px;
+  background: var(--ink);
+  color: var(--cream);
+  outline: 2px solid var(--cream-dark);
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .tool-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .tool-row .tool-btn {
+    flex-direction: column;
+    min-height: 50px;
+    padding: 2px;
+    gap: 1px;
+    min-width: 0;
+    line-height: 1;
+  }
+
+  #panels {
+    left: 8px;
+    right: 8px;
+    bottom: 124px;
+    max-width: none;
+  }
+
+  .window {
+    width: 100%;
+    max-height: calc(100dvh - 140px);
+  }
+
+  #toasts {
+    bottom: 130px;
+  }
+
+  .lower-third {
+    bottom: 130px;
+    z-index: 8;
+  }
+
+  .edit-bar {
+    gap: 4px 8px;
+    padding: 5px;
+  }
+
+  .edit-actions .tool-btn {
+    min-height: 38px;
+    padding: 2px 6px;
+    gap: 4px;
+  }
+
+  /* En pantallas estrechas, solo texto: los botones caben en una fila y dejan ver la sala. */
+  .edit-actions .px-icon {
+    display: none;
+  }
+
+  .map-grid {
+    grid-template-rows: repeat(var(--rows), 62px);
+    gap: 8px;
+  }
+
+  .avatar-preview {
+    width: 80px;
+    height: 136px;
+  }
+
+}
+
+@media (max-height: 480px) and (max-width: 960px) {
+  .bar {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .tool-row {
+    display: flex;
+  }
+
+  .tool-row .tool-btn {
+    flex-direction: row;
+    min-height: 40px;
+    padding: 2px 8px;
+  }
+
+  .tool-label {
+    display: none;
+  }
+
+  #panels {
+    bottom: 62px;
+  }
+
+  .window {
+    max-height: calc(100dvh - 76px);
+  }
+}

@@ -1,0 +1,14 @@
+# Dependencias
+node_modules/
+
+# Salida de build (la genera GitHub Actions)
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema / editor
+.DS_Store
+.vscode/
+.idea/
